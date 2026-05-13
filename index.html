@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Host</title>
+  </head>
+  <body>
+    <script src="WeatherWidget.js?v5" defer></script>
+
+    <weather-widget
+      main-color="#033C40"
+      temp-unit="f"
+      wind-unit="mph"
+      time-format="24h"
+      precip-unit="in">
+      <a slot="branding" href="https://frogcast.com" target="_blank" rel="noopener noreferrer">
+        Powered by FROGCAST API
+      </a>
+    </weather-widget>
+    
+  </body>
+</html>
