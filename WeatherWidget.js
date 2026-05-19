@@ -446,6 +446,13 @@ class WeatherWidget extends HTMLElement {
       gap: 2px;
       width: 100%;
       margin-top: 4px;
+      align-items: center;
+    }
+
+    .hourly__details_element {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
 
     .hourly__details p {
@@ -472,17 +479,15 @@ class WeatherWidget extends HTMLElement {
   </style>
 
   <div class="widget">
-
-     
-
-
     <div class="current">
-     <div class="brand-name">
-        <a href="https://frogcast.com" target="_blank" rel="noopener noreferrer">
-          <img class="brand-logo" src="https://loan-nicolas-demba.github.io/frogcast-widget/frogcast.webp" alt="Frogcast Home">
-        </a>
+      <div class="widget-top">
+        <div class="brand-name">
+            <a href="https://frogcast.com" target="_blank" rel="noopener noreferrer">
+              <img class="brand-logo" src="https://loan-nicolas-demba.github.io/frogcast-widget/frogcast.webp" alt="Frogcast Home">
+            </a>
+          </div>
+          <p id="output">--</p>
       </div>
-      <p id="output">--</p>
       
       <div class="temperature-row">
         <p id="temperature">--</p>
@@ -495,9 +500,21 @@ class WeatherWidget extends HTMLElement {
 
       <div class="additional-weather">
         <div class="current-precipitation">
+          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><title xmlns="">raindrop-measure</title><defs><linearGradient id="SVGdPJ1vbNB" x1="310.5" x2="425.5" y1="152.5" y2="351.5" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d4d7dd"/><stop offset=".5" stop-color="#d4d7dd"/><stop offset="1" stop-color="#bec1c6"/></linearGradient><clipPath id="SVGx2lRIdVh"><path fill="none"><animate attributeName="d" calcMode="spline" dur="3s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" values="M168,252H344V380H168Z; M168,220H376V380H168Z; M168,252H344V380H168Z"/></path></clipPath><symbol id="SVG7o6ULbmV" viewBox="0 0 175 260.9"><path fill="none" stroke="#ffffff" stroke-miterlimit="10" stroke-width="15" d="M87.5 13.4c-48.7 72-80 117-80 160.7s35.8 79.3 80 79.3s80-35.5 80-79.3s-31.3-88.8-80-160.7Z"/></symbol></defs><path fill="none" stroke="#ffffff" stroke-miterlimit="10" stroke-width="15" d="M256 132c-48.7 72-80 117-80 160.8s35.8 79.2 80 79.2s80-35.5 80-79.3S304.7 204 256 132Z"/><path fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M352 132h32v240h-32m8-120h24m-16 56h16m-16-120h16"/><g clip-path="url(#SVGx2lRIdVh)"><use width="175" height="260.9" href="#SVG7o6ULbmV" transform="translate(168.61 119.2)"/></g></svg>
           <p id="current-precipitation">--</p>
         </div>
         <div class="current-wind">
+          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512" role="img" style="">
+            <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Wind</title>
+            <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Deux lignes courbes représentant le vent</desc>
+            <defs>
+              <symbol id="wind" viewBox="0 0 342 234">
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9"/>
+                <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M148.2 212.7A40 40 0 1 0 177 145H9"/>
+              </symbol>
+            </defs>
+            <use width="342" height="234" href="#wind" transform="translate(85 139)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+          </svg>
           <p id="current-wind">--</p>
         </div>
       </div>
@@ -1166,11 +1183,42 @@ class WeatherWidget extends HTMLElement {
         <div class="hourly__divider"></div>
 
         <div class="hourly__details">
-          <p class="hourly__precipitation">${this.formatPrecipitation(hour.mtpr) ?? "--"}</p>
-          <p class="hourly__wind-direction">${this.degreesToCardinal(hour.windDirection)}</p>
-          <p class="hourly__wind-gust">${this.formatSpeed(hour.windGust)  ?? "--"}</p>
-          <p class="hourly__wind-speed">${this.formatSpeed(hour.windSpeed)?? "--"}</p>
-          <p class="hourly__humidity">${Math.round(hour.rh2m )?? "--"}%</p>
+          <div class="hourly__details_element">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 512 512"><title xmlns="">raindrop-measure</title><defs><linearGradient id="SVGdPJ1vbNB" x1="310.5" x2="425.5" y1="152.5" y2="351.5" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d4d7dd"/><stop offset=".5" stop-color="#d4d7dd"/><stop offset="1" stop-color="#bec1c6"/></linearGradient><clipPath id="SVGx2lRIdVh"><path fill="none"><animate attributeName="d" calcMode="spline" dur="3s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" values="M168,252H344V380H168Z; M168,220H376V380H168Z; M168,252H344V380H168Z"/></path></clipPath><symbol id="SVG7o6ULbmV" viewBox="0 0 175 260.9"><path fill="none" stroke="#ffffff" stroke-miterlimit="10" stroke-width="15" d="M87.5 13.4c-48.7 72-80 117-80 160.7s35.8 79.3 80 79.3s80-35.5 80-79.3s-31.3-88.8-80-160.7Z"/></symbol></defs><path fill="none" stroke="#ffffff" stroke-miterlimit="10" stroke-width="15" d="M256 132c-48.7 72-80 117-80 160.8s35.8 79.2 80 79.2s80-35.5 80-79.3S304.7 204 256 132Z"/><path fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6" d="M352 132h32v240h-32m8-120h24m-16 56h16m-16-120h16"/><g clip-path="url(#SVGx2lRIdVh)"><use width="175" height="260.9" href="#SVG7o6ULbmV" transform="translate(168.61 119.2)"/></g></svg>
+            <p class="hourly__precipitation">${this.formatPrecipitation(hour.mtpr) ?? "--"}</p>
+          </div>
+          <div class="hourly__details_element">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 2048 2048"><title xmlns="">wind-direction</title><path fill="#ffffff" d="m1024 0l683 2048l-683-683l-683 683z"/></svg>
+            <p class="hourly__wind-direction">${this.degreesToCardinal(hour.windDirection)}</p>
+          </div>
+          <div class="hourly__details_element">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" width="512" height="512" viewBox="0 0 512 512">
+              <title>Windsock</title>
+              <path fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="24" d="M148 376V136"/>
+              <path fill="#ffffff" d="m191.4 137l28.8 4.3a6.4 6.4 0 0 1 5.4 6.3v73.7a6.4 6.4 0 0 1-5.4 6.3l-28.8 4.2a6.4 6.4 0 0 1-7.3-6.4v-82a6.4 6.4 0 0 1 7.3-6.3Z"/>
+              <path fill="#ffffff" d="m260.6 146.1l28.8 4.2a6.4 6.4 0 0 1 5.4 6.3v55.6a6.4 6.4 0 0 1-5.5 6.3l-28.7 4.2a6.4 6.4 0 0 1-7.3-6.3v-64a6.4 6.4 0 0 1 7.3-6.3Z"/>
+              <path fill="#ffffff" d="m329.8 155.2l28.7 4.2a6.4 6.4 0 0 1 5.5 6.3v37.4a6.4 6.4 0 0 1-5.5 6.3l-28.7 4.2a6.4 6.4 0 0 1-7.3-6.3v-45.8a6.4 6.4 0 0 1 7.3-6.3Z"/>
+            </svg>
+            <p class="hourly__wind-gust">${this.formatSpeed(hour.windGust)  ?? "--"}</p>
+          </div>
+          <div class="hourly__details_element">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 512 512" role="img" style="">
+              <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Wind</title>
+              <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Deux lignes courbes représentant le vent</desc>
+              <defs>
+                <symbol id="wind" viewBox="0 0 342 234">
+                  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M264.2 21.3A40 40 0 1 1 293 89H9"/>
+                  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="18" d="M148.2 212.7A40 40 0 1 0 177 145H9"/>
+                </symbol>
+              </defs>
+              <use width="342" height="234" href="#wind" transform="translate(85 139)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+            </svg>
+            <p class="hourly__wind-speed">${this.formatSpeed(hour.windSpeed)?? "--"}</p>
+          </div>
+          <div class="hourly__details_element">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 512 512"><title xmlns="">humidity</title><defs><symbol id="SVGsr3YqdGo" viewBox="0 0 175 260.9"><path fill="none" stroke="#ffffff" stroke-miterlimit="10" stroke-width="15" d="M87.5 13.4c-48.7 72-80 117-80 160.7s35.8 79.3 80 79.3s80-35.5 80-79.3s-31.3-88.8-80-160.7Z"><animateTransform additive="sum" attributeName="transform" calcMode="spline" dur="6s" keySplines=".42, 0, .58, 1; .42, 0, .58, 1" repeatCount="indefinite" type="scale" values="1 1; 1 .9; 1 1"/></path></symbol></defs><use width="175" height="260.9" href="#SVGsr3YqdGo" transform="translate(168.4 123.18)"/><path fill="#ffffff" d="M218.8 250.5q4.8-4.5 13.7-4.5t13.6 4.5q4.8 4.4 4.8 12.4v8q0 7.8-4.8 12.2t-13.6 4.4q-9 0-13.7-4.4t-4.8-12.2v-8q0-8 4.8-12.4Zm71.2-1.6a2.8 2.8 0 0 1-.6 2.6l-53 73.3a9.4 9.4 0 0 1-2.8 2.8a12.3 12.3 0 0 1-4.6.6h-4.4c-1.3 0-2.1-.4-2.5-1.1a2.8 2.8 0 0 1 .7-2.8l53-73.3a7 7 0 0 1 2.6-2.7a12.7 12.7 0 0 1 4.4-.5h4.9c1.2 0 2 .4 2.3 1.1Zm-57.5 7.6q-7.7 0-7.7 7v6.7q0 7 7.7 7t7.7-7v-6.8q0-6.9-7.7-6.9Zm33.4 36.4q4.7-4.5 13.7-4.5t13.6 4.5q4.8 4.5 4.8 12.4v8q0 7.8-4.8 12.2t-13.7 4.5q-8.9 0-13.6-4.4t-4.8-12.3v-8q0-8 4.8-12.4Zm13.6 6.1q-7.6 0-7.6 7v6.6q0 7 7.6 7t7.7-7v-6.7q0-6.9-7.7-6.9Z"/></svg>
+            <p class="hourly__humidity">${Math.round(hour.rh2m )?? "--"}%</p>
+          </div>
         </div>
       </div>
     `).join("");
