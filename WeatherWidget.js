@@ -5,7 +5,6 @@ class WeatherWidget extends HTMLElement {
     this.mainColor = "#033C40";
     this.latitude = null;
     this.longitude = null;
-    this.dayAmount = 3;
     this.baseApi = "https://api.frogcast.com/api/v1";
     this.weatherData = {
       t2m: null,
@@ -21,53 +20,60 @@ class WeatherWidget extends HTMLElement {
       windGust: null
     };
     this.selectedDayIndex = 0;
+    this.dayAmount = 5;
+    this.widgetToken = null;
+    this.forecastHorizon = false;
     this.useFahrenheit = false;
     this.useMph = false;
     this.use24h = false;
     this.useInches = false;
   }
 
-  initSettings() {
-    const saved = localStorage.getItem("weatherWidgetDayAmount");
-    if (saved === "3" || saved === "5") {
-      this.dayAmount = Number(saved);
-    }
+  /**
+   * Initialises the amount of forecasted days to render
+   */
+  // initSettings() {
+  //   const saved = localStorage.getItem("weatherWidgetDayAmount");
+  //   if (saved === "3" || saved === "5") {
+  //     this.dayAmount = Number(saved);
+  //   }
 
-    const tempUnit = localStorage.getItem("tempUnit");
-    if (tempUnit === "c" || tempUnit === "f") {
-      this.useFahrenheit = tempUnit === "f";
-    }
+  //   const tempUnit = localStorage.getItem("tempUnit");
+  //   if (tempUnit === "c" || tempUnit === "f") {
+  //     this.useFahrenheit = tempUnit === "f";
+  //   }
 
-    const windUnit = localStorage.getItem("windUnit");
-    if (windUnit === "kmh" || windUnit === "mph") {
-      this.useMph = windUnit === "mph";
-    }
+  //   const windUnit = localStorage.getItem("windUnit");
+  //   if (windUnit === "kmh" || windUnit === "mph") {
+  //     this.useMph = windUnit === "mph";
+  //   }
 
-    const timeFormat = localStorage.getItem("timeFormat");
-    if (timeFormat === "12h" || timeFormat === "24h") {
-      this.use24h = timeFormat === "24h";
-    }
+  //   const timeFormat = localStorage.getItem("timeFormat");
+  //   if (timeFormat === "12h" || timeFormat === "24h") {
+  //     this.use24h = timeFormat === "24h";
+  //   }
 
-    const precipUnit = localStorage.getItem("precipUnit");
-    if (precipUnit === "mm" || precipUnit === "in") {
-      this.useInches = precipUnit === "in";
-    }
-  }
+  //   const precipUnit = localStorage.getItem("precipUnit");
+  //   if (precipUnit === "mm" || precipUnit === "in") {
+  //     this.useInches = precipUnit === "in";
+  //   }
+  // }
 
+  /**
+   * 
+   */
   connectedCallback() {
-    this.initSettings();    
+    // this.initSettings();    
     this.render();
-    this.syncDaySelection();
     this.setupEvents();
-    const toggle = this.shadowRoot.getElementById("dayToggle");
-    if (toggle) {
-      toggle.textContent = this.dayAmount === 3 ? "3-day Forecast" : "5-day Forecast";
-    }
     this.loadForecast();
   }
 
+  /**
+   * Sets the names of the observed attributes in the widget's html
+   */
   static get observedAttributes() {
-    return ["main-color", "temp-unit", "wind-unit", "time-format", "precip-unit"];
+    return ["main-color", "day-amount", "widget-token", "temp-unit", "wind-unit", "time-format", "precip-unit"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -77,6 +83,17 @@ class WeatherWidget extends HTMLElement {
       case "main-color":
         this.mainColor = newValue || "#033C40";
         if (this.shadowRoot) this.applyTheme();
+        break;
+      case "widget-token" : 
+        this.widgetToken = newValue;
+        console.log (this.widgetToken);
+        break;
+      case "day-amount":
+        this.forecastHorizon = newValue === "3";
+        if (this.forecastHorizon) {
+          this.dayAmount = 3;
+          console.log(this.dayAmount);
+        }
         break;
       case "temp-unit":
         this.useFahrenheit = newValue === "f";
@@ -93,10 +110,16 @@ class WeatherWidget extends HTMLElement {
     }
   }
 
+  /**
+   * Applies the custom color
+   */
   applyTheme() {
     this.style.setProperty("--main-color", this.mainColor);
   }
 
+  /**
+   * HTML CSS of the widget, hidden icons 
+   */
   render() {
 
     this.shadowRoot.innerHTML = `
@@ -133,41 +156,6 @@ class WeatherWidget extends HTMLElement {
       height: auto;
       display: block;
       object-fit: contain;
-    }
-
-    .switch-row {
-      display: grid;
-      grid-template-columns: repeat(4, max-content);
-      gap: 10px;
-      align-items: center;
-    }
-
-    .switch-group {
-      display: inline-flex;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 999px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .switch-group input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .switch-group label {
-      padding: 8px 12px;
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.55);
-      cursor: pointer;
-      user-select: none;
-      transition: 0.2s;
-    }
-
-    .switch-group input:checked + label {
-      background: rgba(255, 255, 255, 0.22);
-      color: #fff;
     }
 
     .current {
@@ -288,26 +276,6 @@ class WeatherWidget extends HTMLElement {
       margin: 14px 0;
       font-size: 12px;
       color: rgba(255, 255, 255, 0.7);
-    }
-
-    .day-toggle {
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.85);
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
-      margin: 0 0 12px;
-      font-size: 14px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .day-toggle:hover {
-      background: rgba(255, 255, 255, 0.14);
-    }
-
-    .day-toggle:active {
-      transform: scale(0.98);
     }
 
     /* Forecast section */
@@ -521,9 +489,7 @@ class WeatherWidget extends HTMLElement {
     </div>
 
     <section class="forecast">
-      <button id="dayToggle" class="day-toggle" type="button">
-        3-day Forecast
-      </button>
+      <p>Forecast</p>
       <div class="forecast__days" id="forecastDays"></div>
     </section>
 
@@ -977,20 +943,10 @@ class WeatherWidget extends HTMLElement {
 `;
   }
 
+  /**
+   * Adds an event when clicking a day card that renders the forecast for that day and resets the display
+   */
   setupEvents() {
-    const toggle = this.shadowRoot.getElementById("dayToggle");
-    if (toggle) {
-      toggle.addEventListener("click", async () => {
-        this.dayAmount = this.dayAmount === 3 ? 5 : 3;
-        this.selectedDayIndex = 0;
-        toggle.textContent = this.dayAmount === 3 ? "3-day Forecast" : "5-day Forecast";
-        localStorage.setItem("weatherWidgetDayAmount", this.dayAmount);
-
-        await this.renderForecast();
-        this.renderHourlyDetails(0);
-      });
-    }
-
     this.shadowRoot.addEventListener("click", (e) => {
       const card = e.target.closest(".forecast__day");
       if (!card) return;
@@ -1005,50 +961,10 @@ class WeatherWidget extends HTMLElement {
     });
   }
 
-  setupUnitSwitches() {
-    const bindGroup = (name, storageKey, attrName, fallbackValue, onChange) => {
-      const inputs = this.shadowRoot.querySelectorAll(`input[name="${name}"]`);
-      const storedValue = localStorage.getItem(storageKey);
-      const attributeValue = this.getAttribute(attrName);
-      const valueToUse = storedValue || attributeValue || fallbackValue;
-
-      const selectedInput = this.shadowRoot.querySelector(
-        `input[name="${name}"][value="${valueToUse}"]`
-      );
-
-      if (selectedInput) selectedInput.checked = true;
-      onChange(valueToUse);
-
-      inputs.forEach(input => {
-        input.addEventListener("change", () => {
-          if (!input.checked) return;
-          localStorage.setItem(storageKey, input.value);
-          onChange(input.value);
-        });
-      });
-    };
-
-    bindGroup("tempUnit", "tempUnit", "temp-unit", "c", value => {
-      this.useFahrenheit = value === "f";
-      this.renderAll();
-    });
-
-    bindGroup("windUnit", "windUnit", "wind-unit", "kmh", value => {
-      this.useMph = value === "mph";
-      this.renderAll();
-    });
-
-    bindGroup("timeFormat", "timeFormat", "time-format", "12h", value => {
-      this.use24h = value === "24h";
-      this.renderAll();
-    });
-
-    bindGroup("precipUnit", "precipUnit", "precip-unit", "mm", value => {
-      this.useInches = value === "in";
-      this.renderAll();
-    });
-  }
-    
+  /**
+   * Gets the user's closest city name and stores the forecasted data for their coordinates, launches the forecast display functions
+   * 
+   */
   async loadForecast() {
     const output = this.shadowRoot.getElementById("output");
 
@@ -1098,7 +1014,6 @@ class WeatherWidget extends HTMLElement {
         windGust: series["10m_wind_gust"]
       };
 
-      this.setupUnitSwitches();
       this.getTemperature();
       this.setCurrentWeather();
       this.getPrecipitation();
@@ -1112,6 +1027,10 @@ class WeatherWidget extends HTMLElement {
     }
   }
 
+  /**
+   * Generates the html code for the forecast based on the amount of days to show 
+   * @returns the html for the Forecast section
+   */
   renderForecast() {
     const container = this.shadowRoot.getElementById("forecastDays");
     if (!container) return;
@@ -1160,6 +1079,11 @@ class WeatherWidget extends HTMLElement {
   }
 
 
+  /**
+   * Generates the html section for the hourly forecast of a selected day
+   * @param {*} dayIndex the index of the day card 
+   * @returns the html section for the hourly details
+   */
   renderHourlyDetails(dayIndex = 0) {
     const container = this.shadowRoot.getElementById("hourlyList");
     if (!container || !this.weatherData?.t2m) return;
@@ -1192,7 +1116,7 @@ class WeatherWidget extends HTMLElement {
             <p class="hourly__wind-direction">${this.degreesToCardinal(hour.windDirection)}</p>
           </div>
           <div class="hourly__details_element">
-            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" width="512" height="512" viewBox="0 0 512 512">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" width="512" height="512" viewBox="0 0 512 512">
               <title>Windsock</title>
               <path fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="24" d="M148 376V136"/>
               <path fill="#ffffff" d="m191.4 137l28.8 4.3a6.4 6.4 0 0 1 5.4 6.3v73.7a6.4 6.4 0 0 1-5.4 6.3l-28.8 4.2a6.4 6.4 0 0 1-7.3-6.4v-82a6.4 6.4 0 0 1 7.3-6.3Z"/>
@@ -1223,6 +1147,7 @@ class WeatherWidget extends HTMLElement {
       </div>
     `).join("");
 
+    // loads the icons per hour
     day.hours.forEach((hour, index) => {
       const holder = this.shadowRoot.getElementById(`hourly-icon-${index}`);
       if (!holder) return;
@@ -1236,17 +1161,22 @@ class WeatherWidget extends HTMLElement {
     });
   }
 
-  syncDaySelection() {
-    const input = this.shadowRoot.querySelector(`input[name="dayAmount"][value="${this.dayAmount}"]`);
-    if (input) input.checked = true;
-  }
-
+  /**
+   * 
+   * @returns coordinates calculated by the browser's geolocation
+   */
   getPosition() {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject);
     });
   }
 
+  /**
+   * 
+   * @param {*} lat 
+   * @param {*} lon 
+   * @returns the name of the closest city to the coordinates given
+   */
   async getCityName(lat, lon) {
     const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=default`;
     const res = await fetch(url);
@@ -1254,16 +1184,13 @@ class WeatherWidget extends HTMLElement {
     return data.city || data.locality || data.principalSubdivision;
   }
 
-  formatCoordinates(lat, lon, decimals = 2) {
-    const latDir = lat >= 0 ? "N" : "S";
-    const lonDir = lon >= 0 ? "E" : "W";
 
-    const absLat = Math.abs(lat);
-    const absLon = Math.abs(lon);
 
-    return `${absLat.toFixed(decimals)}° ${latDir}, ${absLon.toFixed(decimals)}° ${lonDir}`;
-  }
-
+  /**
+   * 
+   * @param {*} celsius a temperature in celsius degrees   
+   * @returns the temperature in fahrenheit degrees if useFahrenheit is true
+   */
   formatTemperature(celsius) {
     if (celsius == null) return "--";
     return this.useFahrenheit
@@ -1271,12 +1198,22 @@ class WeatherWidget extends HTMLElement {
       : `${Math.round(celsius)}°C`;
   }
 
+  /**
+   * 
+   * @param {*} ms a speed in meters per second
+   * @returns the speed in miles per hour if useMph is true or kilometer per hour otherwise
+   */
   formatSpeed(ms) {
     if (ms == null) return "--";
     const speed = this.useMph ? ms * 2.23694 : ms * 3.6;
     return `${Math.round(speed * 10) / 10}${this.useMph ? " mph" : " km/h"}`;
   }
 
+  /**
+   * 
+   * @param {*} timeText a time from a formatted US date 
+   * @returns a string with the time in 24h format  if use24h is true, a 12h format hour otherwise
+   */
   formatTime(timeText) {
     if (!timeText) return "--";
 
@@ -1299,6 +1236,11 @@ class WeatherWidget extends HTMLElement {
     return `${hour}:${minute} ${period}`;
   }
 
+  /**
+   * 
+   * @param {*} mm a precipitation rate in millimeters
+   * @returns the precipitation in inches if useInches is true, a rounded precipitation in millimeters otherwise
+   */
   formatPrecipitation(mm) {
     if (mm == null) return "--";
     if (this.useInches) {
@@ -1306,32 +1248,29 @@ class WeatherWidget extends HTMLElement {
     }
     return `${Math.round(mm * 10) / 10} mm`;
   }
-  
-  toggleTemperatureUnit() {
-    this.useFahrenheit = !this.useFahrenheit;
-    this.renderAll();
-  }
 
-  toggleWindUnit() {
-    this.useMph = !this.useMph;
-    this.renderAll();
-  }
-
-  toggleTimeFormat() {
-    this.use24h = !this.use24h;
-    this.renderAll();
-  }
-
+  /**
+   * Requests the data to the proxy 
+   * @param {*} field the fields to get the API's data
+   * @param {*} widgetToken the users token
+   * @returns 
+   */
   async getField(field) {
     const response = await fetch(
-      `https://frogcastproxy.onrender.com/forecast?latitude=${this.latitude}&longitude=${this.longitude}&fields=${field}`
+      `https://frogcastproxy.onrender.com/forecast?latitude=${this.latitude}&longitude=${this.longitude}&fields=${field}&widgetToken=${this.widgetToken}`
     );
-
+    console.log(response);
     if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
     return await response.json();
   }
 
-  // filters the data given to only get the data for the following dayAmount of days
+  
+  /**
+   * filters the data given to only get the data for the following dayAmount of days
+   * @param {*} series list of data with timestamps
+   * @param {*} days amount of days to filter by
+   * @returns a list having only the data for the requested amount of days
+   */
   filterByDayAmount(series, days = this.dayAmount) {
     if (!Array.isArray(series)) return [];
 
@@ -1353,6 +1292,12 @@ class WeatherWidget extends HTMLElement {
       .map(item => item.value);
   }
   
+  /**
+   * 
+   * @param {*} weatherData group of series regrouping all forecasted data with timestamps
+   * @param {*} days amount of days to group
+   * @returns the weather data grouped by days
+   */
   groupForecastByDay(weatherData, days = this.dayAmount) {
     const t2m = weatherData?.t2m || [];
     const tcc = weatherData?.tcc || [];
@@ -1443,7 +1388,12 @@ class WeatherWidget extends HTMLElement {
     });
   }
 
-
+/**
+ * Groups the data by hour by day
+ * @param {*} weatherData group of series regrouping all forecasted data with timestamps
+ * @param {*} days the amount of days to group by
+ * @returns 
+ */
   groupHourlyByDay(weatherData, days = this.dayAmount) {
     const t2m = weatherData?.t2m || [];
     const rh2m = weatherData?.rh2m || [];
@@ -1525,7 +1475,6 @@ class WeatherWidget extends HTMLElement {
       .map(item => item.value);
   }
 
-  // pas sûr de l'utilité
   getAverage(list) {
     if (!list.length) return null;
     return list.reduce((acc, value) => acc + value, 0) / list.length;
@@ -1537,21 +1486,6 @@ class WeatherWidget extends HTMLElement {
   }
   
 
-  // returns the [min, max] of a given list
-  // getMinMax(apiData) {
-  //   if (!apiData || !apiData.data || !apiData.data.length) return [null, null];
-  //   console.log(apiData);
-  //   let min = apiData.data[0][0];
-  //   let max = apiData.data[0][0];
-
-  //   for (let i = 1; i < apiData.data.length; i++) {
-  //     const value = apiData.data[i][0];
-  //     if (value < min) min = value;
-  //     if (value > max) max = value;
-  //   }
-  //   console.log(min);
-  //   return [min, max];
-  // }
 
   // returns min and max for a given list of numbers
   getMinMaxFromList(values) {
@@ -1572,7 +1506,6 @@ class WeatherWidget extends HTMLElement {
     return value * 3.6;
   }
 
-  // convenience wrapper: min/max for a field over the selected forecast range
   getForecastMinMax(series, days = this.dayAmount) {
     const values = this.filterByDayAmount(series, days);
     return this.getMinMaxFromList(values);
@@ -1651,14 +1584,6 @@ class WeatherWidget extends HTMLElement {
       return null;
     }
 
-    // const humidity = currentHourData[0];
-    // const minmax = this.getMinMaxFromList(this.filterByDayAmount(data, 1));
-    // this.shadowRoot.getElementById("humidity").textContent =
-    //   `${Math.round(humidity)}%`;
-
-    // this.shadowRoot.getElementById("minmax-humidity").textContent =
-    //   `${Math.round(minmax[0])}-${Math.round(minmax[1])}%`;
-    // return humidity;
   }
 
   getWind() {
@@ -1678,12 +1603,6 @@ class WeatherWidget extends HTMLElement {
 
     this.shadowRoot.getElementById("current-wind").textContent =
       `${this.formatSpeed(dailyAverageSpeed)} ${windDirection}`;
-    // this.shadowRoot.getElementById("windSpeed").textContent =
-    //   `${Math.round(windSpeed * 10) / 10} km/h ${windDirection}`;
-    
-    // const minmax = this.getMinMaxFromList(this.filterByDayAmount(windSpeedData, 1));
-    // this.shadowRoot.getElementById("minmax-windSpeed").textContent =
-    //   `${Math.round(minmax[0] * 10) / 10}-${Math.round(minmax[1] * 10) / 10}m/s`;
     return {
       speed: windSpeed,
       direction: windDirection
@@ -1700,12 +1619,6 @@ class WeatherWidget extends HTMLElement {
     }
 
     const cloud = currentHourData[0];
-    // this.shadowRoot.getElementById("cloudCover").textContent =
-    //   `${Math.round(cloud * 100)}%`;
-
-    // const minmax = this.getMinMaxFromList(this.filterByDayAmount(data, 1));
-    // this.shadowRoot.getElementById("minmax-cloudCover").textContent =
-    //   `${Math.round(minmax[0] * 100)}-${Math.round(minmax[1] * 100)}%`;
     return cloud;
   }
 
