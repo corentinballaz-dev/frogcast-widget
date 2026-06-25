@@ -30,36 +30,6 @@ class WeatherWidget extends HTMLElement {
   }
 
   /**
-   * Initialises the amount of forecasted days to render
-   */
-  // initSettings() {
-  //   const saved = localStorage.getItem("weatherWidgetDayAmount");
-  //   if (saved === "3" || saved === "5") {
-  //     this.dayAmount = Number(saved);
-  //   }
-
-  //   const tempUnit = localStorage.getItem("tempUnit");
-  //   if (tempUnit === "c" || tempUnit === "f") {
-  //     this.useFahrenheit = tempUnit === "f";
-  //   }
-
-  //   const windUnit = localStorage.getItem("windUnit");
-  //   if (windUnit === "kmh" || windUnit === "mph") {
-  //     this.useMph = windUnit === "mph";
-  //   }
-
-  //   const timeFormat = localStorage.getItem("timeFormat");
-  //   if (timeFormat === "12h" || timeFormat === "24h") {
-  //     this.use24h = timeFormat === "24h";
-  //   }
-
-  //   const precipUnit = localStorage.getItem("precipUnit");
-  //   if (precipUnit === "mm" || precipUnit === "in") {
-  //     this.useInches = precipUnit === "in";
-  //   }
-  // }
-
-  /**
    * 
    */
   connectedCallback() {
@@ -134,6 +104,7 @@ class WeatherWidget extends HTMLElement {
       width: 100%;
       max-width: 560px;
       padding: 16px;
+      padding-top: 0;
       border: 1px solid #ddd;
       border-radius: 14px;
       background: var(--main-color, #033C40);
@@ -151,11 +122,30 @@ class WeatherWidget extends HTMLElement {
       display: block;
     }
 
+    .top-row {
+      display: flex;
+      align-items: top;
+      gap: 2em;
+      padding: 0;
+    }
+
     .brand-logo {
-      width: 230px;
+      width: 10em;
       height: auto;
       display: block;
       object-fit: contain;
+    }
+
+    .weather-text {
+      display: flex;
+      flex-direction: column;
+      padding-top: 1em;
+    }
+
+    #location {
+      margin: 0 0 6px 0;
+      font-weight: bold;
+      font-size: 1.2em; 
     }
 
     .current {
@@ -215,7 +205,7 @@ class WeatherWidget extends HTMLElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 14px;
+      padding-right: 1em;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -278,7 +268,6 @@ class WeatherWidget extends HTMLElement {
       color: rgba(255, 255, 255, 0.7);
     }
 
-    /* Forecast section */
     .forecast {
       margin-top: 18px;
     }
@@ -293,61 +282,73 @@ class WeatherWidget extends HTMLElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 12px 8px;
+      padding: 16px 12px; 
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.06);
       text-align: center;
-      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, outline-color 0.2s ease;
+      transition: all 0.2s ease;
     }
-
-    .forecast__day--selected {
-      background: rgba(255, 255, 255, 0.14);
-      outline: 2px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 8px 18px rgba(0, 0, 0, 0.15);
-      transform: translateY(-1px);
-    }
-
-    .forecast__label {
-      margin: 0 0 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
+    
     .forecast__icon {
-      width: 100px;
-      height: 100px;
-      margin-bottom: 8px;
+      width: 6em; 
+      height: 6em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding:0;
+    }
+
+    .forecast__temp-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .forecast__temp-group--horizontal {
+      flex-direction: row;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .forecast__temp-group--vertical {
+      flex-direction: column;
+      gap: 2px;
     }
 
     .forecast__temp-max {
       margin: 0;
-      font-size: 15px;
+      font-size: 18px;
       font-weight: 700;
       color: #fff;
     }
 
     .forecast__temp-min {
-      margin: 2px 0 0;
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
     }
 
     .forecast__extra {
       display: flex;
-      flex-direction: row;
-      gap: 2px;
-      margin: 0;
-      padding: 0;
-      align-self: start;
-      align-items: center;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 8px;
     }
 
-    .forecast__mtpa,
-    .forecast__wind {
-      margin: 2px 0 0;
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.7);
+    .forecast__extra-item {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .forecast__extra-label {
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 500;
     }
 
     .hourly {
@@ -448,22 +449,20 @@ class WeatherWidget extends HTMLElement {
 
   <div class="widget">
     <div class="current">
-      <div class="widget-top">
-        <div class="brand-name">
-            <a href="https://frogcast.com" target="_blank" rel="noopener noreferrer">
-              <img class="brand-logo" src="https://loan-nicolas-demba.github.io/frogcast-widget/frogcast.webp" alt="Frogcast Home">
-            </a>
+      <div class="top-row">
+        <div class="weather-text">
+          <p id="location">--</p>
+          <div class="temperature-row">
+            <p id="temperature">--</p>
+            <div class="weather-details">
+              <p id="current-weather">--</p>
+              <p id="apparent-temperature">--</p>
+            </div>
           </div>
-          <p id="output">--</p>
-      </div>
-      
-      <div class="temperature-row">
-        <p id="temperature">--</p>
-
-        <div class="weather-details">
-          <p id="current-weather">--</p>
-          <p id="apparent-temperature">--</p>
         </div>
+        <a href="https://frogcast.com" target="_blank" rel="noopener noreferrer">
+          <img class="brand-logo" src="frogcast.webp" alt="Frogcast Home">
+        </a>
       </div>
 
       <div class="additional-weather">
@@ -966,10 +965,10 @@ class WeatherWidget extends HTMLElement {
    * 
    */
   async loadForecast() {
-    const output = this.shadowRoot.getElementById("output");
+    const location = this.shadowRoot.getElementById("location");
 
     if (!("geolocation" in navigator)) {
-      output.textContent = "Geolocation is not supported by this browser.";
+      location.textContent = "Geolocation is not supported by this browser.";
       return;
     }
 
@@ -988,7 +987,7 @@ class WeatherWidget extends HTMLElement {
 
       const city = await this.getCityName(this.latitude, this.longitude);
       
-      this.shadowRoot.getElementById("output").textContent = city || "Unknown location";;
+      this.shadowRoot.getElementById("location").textContent = city || "Unknown location";;
 
       const apiData = await this.getField("t2m,rh2m,10m_wind_speed,10m_wind_direction,tcc,mtpa,ghi,mtpr,mtsr,storm_idx,10m_gust");
 
@@ -1023,7 +1022,7 @@ class WeatherWidget extends HTMLElement {
       this.renderForecast();
       this.renderHourlyDetails(0);
     } catch (error) {
-      output.textContent = `Error: ${error.message}`;
+      location.textContent = `Error: ${error.message}`;
     }
   }
 
@@ -1040,27 +1039,32 @@ class WeatherWidget extends HTMLElement {
     container.innerHTML = days.map((day, index) => {
       const is3Day = this.dayAmount == 3;
       return `
-        <article class="forecast__day ${index === this.selectedDayIndex ? "forecast__day--selected" : ""}" ${is3Day ? "forecast__day--3day" : ""}" data-day-index="${index}">
+        <article class="forecast__day ${index === this.selectedDayIndex ? 'forecast__day--selected' : ''} ${is3Day ? 'forecast__day--3day' : ''}" data-day-index="${index}">
           <p class="forecast__label">${day.label}</p>
           <div class="forecast__icon" id="forecast-icon-${index}"></div>
-          
 
-          ${
-            is3Day
-              ? `
-                <div class="forecast__extra">
-                  <p class="forecast__mtpa">${this.formatPrecipitation(day.mtpa)}</p>
-                  <div class="forecast__extra-temp">
-                    <p class="forecast__temp-max">${this.formatTemperature(day.max)}</p>
-                    <p class="forecast__temp-min">${this.formatTemperature(day.min)}</p>
-                  </div>
-                  <p class="forecast__wind">${this.formatSpeed(this.getAverage(day.windSpeed))} ${this.degreesToCardinal(this.getAverage(day.windDirection))}</p>
-                </div>
-              `
-              : `
+          ${is3Day 
+            ? `
+              <div class="forecast__temp-group forecast__temp-group--horizontal">
+                <span class="forecast__temp-max">${this.formatTemperature(day.max)}</span>
+                <span class="forecast__temp-min">${this.formatTemperature(day.min)}</span>
+              </div>
+
+              <div class="forecast__extra">
+                <p class="forecast__extra-item forecast__mtpa">
+                  <span class="forecast__extra-label">Precipitation:</span> ${this.formatPrecipitation(day.mtpa)}
+                </p>
+                <p class="forecast__extra-item forecast__wind">
+                  <span class="forecast__extra-label">Wind:</span> ${this.formatSpeed(this.getAverage(day.windSpeed))} ${this.degreesToCardinal(this.getAverage(day.windDirection))}
+                </p>
+              </div>
+            `
+            : `
+              <div class="forecast__temp-group forecast__temp-group--vertical">
                 <p class="forecast__temp-max">${this.formatTemperature(day.max)}</p>
                 <p class="forecast__temp-min">${this.formatTemperature(day.min)}</p>
-                `
+              </div>
+            `
           }
         </article>
       `;
