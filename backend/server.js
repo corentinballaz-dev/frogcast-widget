@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 
-const secret = process.env.X-SteadyWeb-Secret;
+const secret = process.env['X-SteadyWeb-Secret'];
 app.get("/forecast", async (req, res) => {
   try {
     const { latitude, longitude, fields, widgetToken} = req.query;
